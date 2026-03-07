@@ -30,6 +30,13 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Added src/types/react-qr-scanner.d.ts TypeScript declarations
   - Uses facingMode: "environment" for rear camera on mobile
   - Remounts scanner via key prop when "Scan Again" is clicked
+- [x] Fixed QR scanner detection: react-qr-scanner could not detect app-generated QR codes
+  - Root cause 1: QR codes used custom green colors (#166534 on #f0fdf4) — insufficient contrast for scanner algorithms
+  - Root cause 2: react-qr-scanner (@zxing/library) is unreliable with non-standard QR code colors
+  - Fix 1: Changed QRCodeDisplay.tsx to generate standard black-on-white QR codes (#000000 on #ffffff)
+  - Fix 2: Replaced react-qr-scanner with custom jsqr canvas-based scanner in QRScanner.tsx
+  - New scanner: getUserMedia → video element → hidden canvas → jsqr frame-by-frame analysis via requestAnimationFrame
+  - Camera properly stopped on close/unmount via streamRef and animFrameRef cleanup
 
 ## Current Structure
 
