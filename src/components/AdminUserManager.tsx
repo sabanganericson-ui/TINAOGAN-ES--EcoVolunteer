@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 interface ParentUser {
@@ -17,6 +17,20 @@ interface AdminUserManagerProps {
 
 export default function AdminUserManager({ users }: AdminUserManagerProps) {
   const router = useRouter();
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter users by search query
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase().trim();
+    return users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query)
+    );
+  }, [users, searchQuery]);
 
   // Edit state
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
@@ -141,6 +155,34 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
         Registered Parent Volunteers
       </h2>
 
+      {/* Search Bar */}
+      {users.length > 0 && (
+        <div className="mb-4">
+          <div className="relative">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 text-green-900 text-sm placeholder-green-300"
+            />
+          </div>
+        </div>
+      )}
+
       {users.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-4xl mb-2">👨‍👩‍👧</div>
@@ -151,7 +193,20 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
         </div>
       ) : (
         <div className="space-y-3">
-          {users.map((user) => (
+          {filteredUsers.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-2">🔍</div>
+              <p className="text-green-400 text-sm">No matching volunteers found.</p>
+              <p className="text-green-300 text-xs mt-1">
+                Try a different search term.
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="text-green-500 text-xs mb-2">
+                Showing {filteredUsers.length} of {users.length} volunteer{users.length !== 1 ? "s" : ""}
+              </p>
+              {filteredUsers.map((user) => (
             <div
               key={user.id}
               className="border border-green-100 rounded-xl p-4"
@@ -367,7 +422,9 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
                 </div>
               )}
             </div>
-          ))}
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
