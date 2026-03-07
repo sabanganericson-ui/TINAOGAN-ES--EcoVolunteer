@@ -24,10 +24,11 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Bottom navigation bar (Home, Leaderboard, Profile)
   - Eco-friendly green theme, fully mobile-responsive
   - +10 points per event check-in, duplicate prevention
-- [x] Fixed QR scanner: replaced manual jsqr canvas-polling with react-qr-scanner library
-  - react-qr-scanner uses native BarcodeDetector API / ZXing — much more reliable on mobile
-  - Removed duplicated camera setup code in handleScanAgain (now uses key remount pattern)
-  - Added src/types/react-qr-scanner.d.ts type declaration for TypeScript compatibility
+- [x] Fixed QR scanner: replaced react-qr-scanner (broken due to missing @babel/runtime peer dep) with custom implementation
+  - Uses native BarcodeDetector API (hardware-accelerated, fast on Android/Chrome)
+  - Falls back to jsqr canvas polling for browsers without BarcodeDetector support
+  - Removed react-qr-scanner from package.json and deleted src/types/react-qr-scanner.d.ts
+  - Build now succeeds (no more "Module not found: @babel/runtime" error)
 
 ## Current Structure
 
