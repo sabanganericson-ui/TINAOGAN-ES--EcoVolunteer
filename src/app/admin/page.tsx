@@ -54,7 +54,7 @@ export default async function AdminPage() {
               <span className="text-green-100 text-xs font-medium">ADMIN</span>
             </div>
           </div>
-          <h1 className="text-white text-2xl font-bold">School Dashboard</h1>
+          <h1 className="text-white text-2xl font-bold">TINAOGAN ES- EcoVolunteer</h1>
           <p className="text-green-200 text-sm mt-1">Welcome, {session.name}</p>
 
           {/* Stats Row */}

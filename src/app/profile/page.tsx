@@ -98,9 +98,9 @@ export default async function ProfilePage() {
 
         {/* About */}
         <div className="bg-white rounded-2xl shadow-sm p-5">
-          <h2 className="text-green-900 font-semibold mb-3">About EcoVolunteer</h2>
+          <h2 className="text-green-900 font-semibold mb-3">About TINAOGAN ES- EcoVolunteer</h2>
           <p className="text-green-500 text-sm leading-relaxed">
-            EcoVolunteer helps track parent participation in school clean-up events. 
+            TINAOGAN ES- EcoVolunteer helps track parent participation in school clean-up events.
             Earn points for every event you attend and climb the leaderboard! 🌱
           </p>
           <div className="mt-3 flex items-center gap-2">

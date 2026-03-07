@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "EcoVolunteer - School Volunteer Tracker",
-  description: "Track volunteer attendance and points for school clean-up events",
+  title: "TINAOGAN ES- EcoVolunteer",
+  description: "Track volunteer attendance and points for school clean-up events at Tinaogan Elementary School",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
