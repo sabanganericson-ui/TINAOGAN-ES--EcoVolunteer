@@ -48,6 +48,11 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - PUT /api/users updates name, email, points, and optionally password (admin-only)
   - DELETE /api/users removes a parent account and all their attendance records (admin-only)
   - New AdminUserManager component on admin page lists all parents with edit/delete buttons
+- [x] Added search bar to filter parent volunteers by name or email
+  - Search input appears above the user list when there are users
+  - Filters by name or email (case-insensitive)
+  - Shows "X of Y volunteers" count when filtering
+  - Shows "No matching volunteers found" message when no results
   - Edit form: inline per-user form with name, email, points, optional new password fields
   - Delete: two-step confirmation with warning about permanent data loss
   - Admin page now fetches allParents directly and passes to AdminUserManager
