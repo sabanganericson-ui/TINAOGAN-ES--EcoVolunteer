@@ -7,6 +7,7 @@ export const users = sqliteTable("users", {
   password: text("password").notNull(),
   role: text("role", { enum: ["admin", "parent"] }).notNull().default("parent"),
   points: integer("points").notNull().default(0),
+  gradeLevel: text("grade_level"),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 

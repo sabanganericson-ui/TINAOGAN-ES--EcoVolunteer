@@ -46,6 +46,7 @@ export default async function AdminPage() {
       name: users.name,
       email: users.email,
       points: users.points,
+      gradeLevel: users.gradeLevel,
       createdAt: users.createdAt,
     })
     .from(users)

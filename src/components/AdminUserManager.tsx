@@ -8,6 +8,7 @@ interface ParentUser {
   name: string;
   email: string;
   points: number;
+  gradeLevel: string | null;
   createdAt: Date | null;
 }
 
@@ -38,6 +39,7 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
     name: "",
     email: "",
     points: 0,
+    gradeLevel: "",
     password: "",
   });
   const [editLoading, setEditLoading] = useState(false);
@@ -54,6 +56,7 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
       name: user.name,
       email: user.email,
       points: user.points,
+      gradeLevel: user.gradeLevel || "",
       password: "",
     });
     setEditError("");
@@ -63,7 +66,7 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
 
   const cancelEdit = () => {
     setEditingUserId(null);
-    setEditForm({ name: "", email: "", points: 0, password: "" });
+    setEditForm({ name: "", email: "", points: 0, gradeLevel: "", password: "" });
     setEditError("");
   };
 
@@ -79,6 +82,7 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
         name: string;
         email: string;
         points: number;
+        gradeLevel?: string;
         password?: string;
       } = {
         id: editingUserId,
@@ -86,6 +90,9 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
         email: editForm.email,
         points: editForm.points,
       };
+      if (editForm.gradeLevel) {
+        body.gradeLevel = editForm.gradeLevel;
+      }
       if (editForm.password.trim()) {
         body.password = editForm.password.trim();
       }
@@ -269,6 +276,28 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
 
                   <div>
                     <label className="block text-xs font-medium text-green-800 mb-1">
+                      Child&apos;s Grade Level
+                    </label>
+                    <select
+                      value={editForm.gradeLevel}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, gradeLevel: e.target.value })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 text-green-900 text-sm"
+                    >
+                      <option value="">Select grade level</option>
+                      <option value="Kindergarten">Kindergarten</option>
+                      <option value="1st Grade">1st Grade</option>
+                      <option value="2nd Grade">2nd Grade</option>
+                      <option value="3rd Grade">3rd Grade</option>
+                      <option value="4th Grade">4th Grade</option>
+                      <option value="5th Grade">5th Grade</option>
+                      <option value="6th Grade">6th Grade</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-green-800 mb-1">
                       New Password{" "}
                       <span className="text-green-400 font-normal">
                         (leave blank to keep current)
@@ -374,6 +403,14 @@ export default function AdminUserManager({ users }: AdminUserManagerProps) {
                       </span>
                       <span className="text-green-400 text-xs">pts</span>
                     </div>
+                    {user.gradeLevel && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <span className="text-green-400 text-xs">📚</span>
+                        <span className="text-green-500 text-xs">
+                          {user.gradeLevel}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 ml-3 flex-shrink-0">

@@ -17,6 +17,7 @@ export async function GET() {
         name: users.name,
         email: users.email,
         points: users.points,
+        gradeLevel: users.gradeLevel,
         createdAt: users.createdAt,
       })
       .from(users)
@@ -40,7 +41,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { id, name, email, password, points } = await request.json();
+    const { id, name, email, password, points, gradeLevel } = await request.json();
 
     if (!id || !name || !email) {
       return NextResponse.json(
@@ -69,10 +70,15 @@ export async function PUT(request: NextRequest) {
       email: string;
       points?: number;
       password?: string;
+      gradeLevel?: string | null;
     } = { name, email };
 
     if (typeof points === "number" && points >= 0) {
       updateData.points = points;
+    }
+
+    if (gradeLevel !== undefined) {
+      updateData.gradeLevel = gradeLevel || null;
     }
 
     if (password && password.trim().length > 0) {
@@ -88,6 +94,7 @@ export async function PUT(request: NextRequest) {
         name: users.name,
         email: users.email,
         points: users.points,
+        gradeLevel: users.gradeLevel,
         createdAt: users.createdAt,
       });
 

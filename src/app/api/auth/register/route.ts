@@ -6,7 +6,7 @@ import { hashPassword, createSessionToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, role } = await request.json();
+    const { name, email, password, role, gradeLevel } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         role: userRole,
         points: 0,
+        gradeLevel: gradeLevel || null,
       })
       .returning();
 
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
         email: newUser.email,
         role: newUser.role,
         points: newUser.points,
+        gradeLevel: newUser.gradeLevel,
       },
     });
 

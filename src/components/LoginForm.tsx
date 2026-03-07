@@ -13,6 +13,7 @@ export default function LoginForm() {
     email: "",
     password: "",
     role: "parent" as "parent" | "admin",
+    gradeLevel: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +26,7 @@ export default function LoginForm() {
       const body =
         mode === "login"
           ? { email: form.email, password: form.password }
-          : { name: form.name, email: form.email, password: form.password, role: form.role };
+          : { name: form.name, email: form.email, password: form.password, role: form.role, gradeLevel: form.role === "parent" ? form.gradeLevel || null : null };
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -138,6 +139,28 @@ export default function LoginForm() {
             >
               <option value="parent">Parent / Volunteer</option>
               <option value="admin">School Staff (Admin)</option>
+            </select>
+          </div>
+        )}
+
+        {mode === "register" && form.role === "parent" && (
+          <div>
+            <label className="block text-sm font-medium text-green-800 mb-1">
+              Child&apos;s Grade Level
+            </label>
+            <select
+              value={form.gradeLevel}
+              onChange={(e) => setForm({ ...form, gradeLevel: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 text-green-900"
+            >
+              <option value="">Select grade level</option>
+              <option value="Kindergarten">Kindergarten</option>
+              <option value="1st Grade">1st Grade</option>
+              <option value="2nd Grade">2nd Grade</option>
+              <option value="3rd Grade">3rd Grade</option>
+              <option value="4th Grade">4th Grade</option>
+              <option value="5th Grade">5th Grade</option>
+              <option value="6th Grade">6th Grade</option>
             </select>
           </div>
         )}
