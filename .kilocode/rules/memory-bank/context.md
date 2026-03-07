@@ -14,6 +14,16 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
+- [x] Full-stack School Volunteer Attendance & Points Tracker app
+  - SQLite database with Drizzle ORM (users, events, attendance tables)
+  - Session-based authentication with cookie storage
+  - Admin role: create events, QR code scanner for check-in
+  - Parent role: dashboard with points, unique QR code, attendance history
+  - Leaderboard page with podium display (sorted by points)
+  - Profile page with stats and account info
+  - Bottom navigation bar (Home, Leaderboard, Profile)
+  - Eco-friendly green theme, fully mobile-responsive
+  - +10 points per event check-in, duplicate prevention
 
 ## Current Structure
 
