@@ -43,6 +43,14 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Edit form pre-fills current title and date values
   - Shows inline error messages on validation or server failure
   - Cancel button restores normal event view without saving
+- [x] Added admin management of registered parent volunteer accounts
+  - GET /api/users returns all parent accounts (admin-only)
+  - PUT /api/users updates name, email, points, and optionally password (admin-only)
+  - DELETE /api/users removes a parent account and all their attendance records (admin-only)
+  - New AdminUserManager component on admin page lists all parents with edit/delete buttons
+  - Edit form: inline per-user form with name, email, points, optional new password fields
+  - Delete: two-step confirmation with warning about permanent data loss
+  - Admin page now fetches allParents directly and passes to AdminUserManager
 
 ## Current Structure
 

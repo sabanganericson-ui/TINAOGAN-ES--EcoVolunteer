@@ -5,6 +5,7 @@ import { events, attendance, users } from "@/db/schema";
 import { eq, desc, count } from "drizzle-orm";
 import BottomNav from "@/components/BottomNav";
 import AdminEventManager from "@/components/AdminEventManager";
+import AdminUserManager from "@/components/AdminUserManager";
 
 export default async function AdminPage() {
   const session = await getSession();
@@ -38,11 +39,20 @@ export default async function AdminPage() {
     attendeeCount: countMap.get(e.id) || 0,
   }));
 
-  // Get total parents count
-  const [parentCount] = await db
-    .select({ count: count(users.id) })
+  // Get all parent volunteers
+  const allParents = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      points: users.points,
+      createdAt: users.createdAt,
+    })
     .from(users)
-    .where(eq(users.role, "parent"));
+    .where(eq(users.role, "parent"))
+    .orderBy(users.name);
+
+  const parentCount = allParents.length;
 
   return (
     <div className="min-h-screen bg-green-50 pb-20">
@@ -65,14 +75,15 @@ export default async function AdminPage() {
             </div>
             <div className="bg-white/20 rounded-xl p-4">
               <p className="text-green-100 text-xs">Registered Parents</p>
-              <p className="text-white text-2xl font-bold">{parentCount?.count || 0}</p>
+              <p className="text-white text-2xl font-bold">{parentCount}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 mt-6">
+      <div className="max-w-lg mx-auto px-4 mt-6 space-y-6">
         <AdminEventManager events={eventsWithCounts} />
+        <AdminUserManager users={allParents} />
       </div>
 
       <BottomNav role="admin" />
