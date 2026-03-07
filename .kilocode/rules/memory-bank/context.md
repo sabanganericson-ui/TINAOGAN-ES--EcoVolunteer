@@ -24,6 +24,10 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Bottom navigation bar (Home, Leaderboard, Profile)
   - Eco-friendly green theme, fully mobile-responsive
   - +10 points per event check-in, duplicate prevention
+- [x] Fixed QR scanner: replaced manual jsqr canvas-polling with react-qr-scanner library
+  - react-qr-scanner uses native BarcodeDetector API / ZXing — much more reliable on mobile
+  - Removed duplicated camera setup code in handleScanAgain (now uses key remount pattern)
+  - Added src/types/react-qr-scanner.d.ts type declaration for TypeScript compatibility
 
 ## Current Structure
 
