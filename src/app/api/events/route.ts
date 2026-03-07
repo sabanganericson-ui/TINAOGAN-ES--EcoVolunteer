@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { events } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -49,6 +49,42 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ event: newEvent }, { status: 201 });
   } catch (error) {
     console.error("Create event error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { id, title, date } = await request.json();
+
+    if (!id || !title || !date) {
+      return NextResponse.json(
+        { error: "Id, title and date are required" },
+        { status: 400 }
+      );
+    }
+
+    const [updated] = await db
+      .update(events)
+      .set({ title, date })
+      .where(eq(events.id, id))
+      .returning();
+
+    if (!updated) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ event: updated });
+  } catch (error) {
+    console.error("Update event error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
