@@ -37,6 +37,12 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Fix 2: Replaced react-qr-scanner with custom jsqr canvas-based scanner in QRScanner.tsx
   - New scanner: getUserMedia → video element → hidden canvas → jsqr frame-by-frame analysis via requestAnimationFrame
   - Camera properly stopped on close/unmount via streamRef and animFrameRef cleanup
+- [x] Added edit functionality for Clean-up Events
+  - PUT /api/events endpoint updates event title and date (admin-only)
+  - Pencil icon button on each event card opens an inline edit form
+  - Edit form pre-fills current title and date values
+  - Shows inline error messages on validation or server failure
+  - Cancel button restores normal event view without saving
 
 ## Current Structure
 
