@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import dynamic from "next/dynamic";
-
-// Dynamically import react-qr-scanner to avoid SSR issues
-const QrReader = dynamic(() => import("react-qr-scanner"), { ssr: false });
+import { useState, useCallback, useRef, useEffect } from "react";
+import jsQR from "jsqr";
 
 interface QRScannerProps {
   eventId: number;
@@ -24,7 +21,13 @@ export default function QRScanner({
   const [scanState, setScanState] = useState<ScanState>("scanning");
   const [message, setMessage] = useState("");
   const [parentName, setParentName] = useState("");
-  const [scanKey, setScanKey] = useState(0);
+  const [cameraError, setCameraError] = useState("");
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const scanningRef = useRef(true);
 
   const handleCheckin = useCallback(
     async (userId: number) => {
@@ -59,30 +62,89 @@ export default function QRScanner({
     [eventId, onSuccess]
   );
 
-  const handleScan = useCallback(
-    (data: { text: string } | null) => {
-      if (!data || scanState !== "scanning") return;
-      try {
-        const parsed = JSON.parse(data.text);
-        if (parsed.type === "volunteer-checkin" && parsed.userId) {
-          handleCheckin(parsed.userId);
-        }
-      } catch {
-        // Not a valid QR code for this app — ignore
-      }
-    },
-    [scanState, handleCheckin]
-  );
-
-  const handleError = useCallback((err: Error) => {
-    console.error("QR Scanner error:", err);
+  const stopCamera = useCallback(() => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
   }, []);
+
+  const startCamera = useCallback(() => {
+    scanningRef.current = true;
+
+    navigator.mediaDevices
+      .getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      })
+      .then((stream) => {
+        streamRef.current = stream;
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        video.setAttribute("playsinline", "true");
+        video.play().then(() => {
+          const tick = () => {
+            if (!scanningRef.current) return;
+            const canvas = canvasRef.current;
+            if (!canvas || !video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+              animFrameRef.current = requestAnimationFrame(tick);
+              return;
+            }
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              animFrameRef.current = requestAnimationFrame(tick);
+              return;
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert",
+            });
+            if (code && code.data) {
+              try {
+                const parsed = JSON.parse(code.data);
+                if (parsed.type === "volunteer-checkin" && parsed.userId) {
+                  scanningRef.current = false;
+                  handleCheckin(parsed.userId);
+                  return;
+                }
+              } catch {
+                // Not a valid QR code for this app — keep scanning
+              }
+            }
+            animFrameRef.current = requestAnimationFrame(tick);
+          };
+          animFrameRef.current = requestAnimationFrame(tick);
+        });
+      })
+      .catch((err) => {
+        console.error("Camera error:", err);
+        setCameraError(
+          "Could not access camera. Please allow camera permission and try again."
+        );
+      });
+  }, [handleCheckin]);
+
+  useEffect(() => {
+    startCamera();
+    return () => {
+      scanningRef.current = false;
+      stopCamera();
+    };
+  }, [startCamera, stopCamera]);
 
   const handleScanAgain = () => {
     setMessage("");
     setParentName("");
     setScanState("scanning");
-    setScanKey((k) => k + 1); // remount scanner to restart camera
+    startCamera();
   };
 
   return (
@@ -94,7 +156,10 @@ export default function QRScanner({
           <p className="text-green-300 text-xs">{eventTitle}</p>
         </div>
         <button
-          onClick={onClose}
+          onClick={() => {
+            stopCamera();
+            onClose();
+          }}
           className="text-white bg-white/20 rounded-full p-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,30 +172,46 @@ export default function QRScanner({
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         {scanState === "scanning" && (
           <div className="relative w-full max-w-sm">
-            <div className="rounded-2xl overflow-hidden bg-black">
-              <QrReader
-                key={scanKey}
-                onScan={handleScan}
-                onError={handleError}
-                constraints={{
-                  audio: false,
-                  video: { facingMode: "environment" },
-                }}
-                style={{ width: "100%" }}
-              />
-            </div>
-            {/* Scan overlay corners */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-48 h-48 border-2 border-green-400 rounded-2xl relative">
-                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-green-400 rounded-tl-lg" />
-                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-green-400 rounded-tr-lg" />
-                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-green-400 rounded-bl-lg" />
-                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-green-400 rounded-br-lg" />
+            {cameraError ? (
+              <div className="bg-red-900/80 rounded-2xl p-6 text-center">
+                <p className="text-white text-sm">{cameraError}</p>
+                <button
+                  onClick={() => {
+                    setCameraError("");
+                    startCamera();
+                  }}
+                  className="mt-4 bg-green-600 text-white px-4 py-2 rounded-xl text-sm"
+                >
+                  Retry
+                </button>
               </div>
-            </div>
-            <p className="text-white text-center text-sm mt-4">
-              Point camera at parent&apos;s QR code
-            </p>
+            ) : (
+              <>
+                <div className="rounded-2xl overflow-hidden bg-black">
+                  {/* Hidden canvas for jsQR processing */}
+                  <canvas ref={canvasRef} className="hidden" />
+                  {/* Visible video feed */}
+                  <video
+                    ref={videoRef}
+                    className="w-full"
+                    muted
+                    playsInline
+                  />
+                </div>
+                {/* Scan overlay corners */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-48 h-48 border-2 border-green-400 rounded-2xl relative">
+                    <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-green-400 rounded-tl-lg" />
+                    <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-green-400 rounded-tr-lg" />
+                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-green-400 rounded-bl-lg" />
+                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-green-400 rounded-br-lg" />
+                  </div>
+                </div>
+                <p className="text-white text-center text-sm mt-4">
+                  Point camera at parent&apos;s QR code
+                </p>
+              </>
+            )}
           </div>
         )}
 
@@ -163,7 +244,10 @@ export default function QRScanner({
                 Scan Next
               </button>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  stopCamera();
+                  onClose();
+                }}
                 className="flex-1 border border-green-200 text-green-600 font-semibold py-3 rounded-xl"
               >
                 Done
@@ -189,7 +273,10 @@ export default function QRScanner({
                 Scan Another
               </button>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  stopCamera();
+                  onClose();
+                }}
                 className="flex-1 border border-green-200 text-green-600 font-semibold py-3 rounded-xl"
               >
                 Done
@@ -215,7 +302,10 @@ export default function QRScanner({
                 Try Again
               </button>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  stopCamera();
+                  onClose();
+                }}
                 className="flex-1 border border-green-200 text-green-600 font-semibold py-3 rounded-xl"
               >
                 Cancel

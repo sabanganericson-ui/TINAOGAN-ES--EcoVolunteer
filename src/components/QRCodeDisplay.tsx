@@ -19,8 +19,8 @@ export default function QRCodeDisplay({ userId, userName }: QRCodeDisplayProps) 
         width: 200,
         margin: 2,
         color: {
-          dark: "#166534",
-          light: "#f0fdf4",
+          dark: "#000000",
+          light: "#ffffff",
         },
       });
     }
