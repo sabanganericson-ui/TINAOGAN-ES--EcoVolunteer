@@ -48,6 +48,15 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - PUT /api/users updates name, email, points, and optionally password (admin-only)
   - DELETE /api/users removes a parent account and all their attendance records (admin-only)
   - New AdminUserManager component on admin page lists all parents with edit/delete buttons
+- [x] Added grade level field to parent volunteer registration
+  - Added gradeLevel column to users table in database schema
+  - Created database migration (0001_adept_guardians.sql)
+  - Grade level dropdown in registration form (Kindergarten through 6th Grade)
+  - Grade level display and editing in admin user manager
+- [x] Added QR code display to admin parent user management
+  - QR code button added to each parent volunteer in admin panel
+  - Clicking opens modal with parent's unique QR code for event check-in
+  - Modal displays user name, grade level, and ID along with QR code
 - [x] Added search bar to filter parent volunteers by name or email
   - Search input appears above the user list when there are users
   - Filters by name or email (case-insensitive)
