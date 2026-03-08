@@ -48,6 +48,10 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - PUT /api/users updates name, email, points, and optionally password (admin-only)
   - DELETE /api/users removes a parent account and all their attendance records (admin-only)
   - New AdminUserManager component on admin page lists all parents with edit/delete buttons
+- [x] Added attendance download feature for events
+  - GET /api/attendance/download?eventId=X endpoint for admin to download attendance CSV
+  - Download button on each event card (visible when attendees > 0)
+  - CSV includes: Name, Email, Grade Level, Points Awarded, Check-in Time
 - [x] Added grade level field to parent volunteer registration
   - Added gradeLevel column to users table in database schema
   - Created database migration (0001_adept_guardians.sql)
