@@ -108,6 +108,38 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
     setScanningEventTitle("");
   };
 
+  const downloadAttendance = async (eventId: number, eventTitle: string, eventDate: string) => {
+    try {
+      const response = await fetch(`/api/attendance/download?eventId=${eventId}`);
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || "Failed to download attendance");
+        return;
+      }
+      
+      // Get the filename from the Content-Disposition header
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = `attendance_${eventDate}.csv`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match) filename = match[1];
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch {
+      alert("Network error. Please try again.");
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Create Event Button */}
@@ -260,6 +292,18 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
                           <p className="text-green-700 font-bold text-lg">{event.attendeeCount}</p>
                           <p className="text-green-400 text-xs">checked in</p>
                         </div>
+                        {/* Download Button */}
+                        {event.attendeeCount > 0 && (
+                          <button
+                            onClick={() => downloadAttendance(event.id, event.title, event.date)}
+                            title="Download attendance"
+                            className="p-2 rounded-xl border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          </button>
+                        )}
                         {/* Edit Button */}
                         <button
                           onClick={() => openEdit(event)}
