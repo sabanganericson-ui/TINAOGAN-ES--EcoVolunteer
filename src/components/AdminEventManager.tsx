@@ -137,9 +137,23 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
   const downloadAttendance = async (eventId: number, eventTitle: string, eventDate: string) => {
     try {
       const response = await fetch(`/api/attendance/download?eventId=${eventId}`);
+      
+      // Check if the response is OK
       if (!response.ok) {
         const data = await response.json();
+        // Handle case where there are no attendees
+        if (response.status === 200 && data.error?.includes("No attendance")) {
+          alert("No attendees have checked in for this event yet.");
+          return;
+        }
         alert(data.error || "Failed to download attendance");
+        return;
+      }
+      
+      // Check if we got an empty CSV (no attendees)
+      const text = await response.text();
+      if (text.trim() === "Name,Email,Grade Level,Points Awarded,Check-in Time") {
+        alert("No attendees have checked in for this event yet.");
         return;
       }
       
@@ -152,7 +166,7 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
       }
 
       // Create blob and download
-      const blob = await response.blob();
+      const blob = new Blob([text], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -318,18 +332,16 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
                           <p className="text-green-700 font-bold text-lg">{event.attendeeCount}</p>
                           <p className="text-green-400 text-xs">checked in</p>
                         </div>
-                        {/* Download Button */}
-                        {event.attendeeCount > 0 && (
-                          <button
-                            onClick={() => downloadAttendance(event.id, event.title, event.date)}
-                            title="Download attendance"
-                            className="p-2 rounded-xl border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                          </button>
-                        )}
+                        {/* Download Button - show for all events */}
+                        <button
+                          onClick={() => downloadAttendance(event.id, event.title, event.date)}
+                          title="Download attendance report"
+                          className="p-2 rounded-xl border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </button>
                         {/* Edit Button */}
                         <button
                           onClick={() => openEdit(event)}

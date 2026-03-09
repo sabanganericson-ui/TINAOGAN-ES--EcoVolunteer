@@ -60,6 +60,14 @@ export async function GET(request: NextRequest) {
       .where(eq(attendance.eventId, eventIdNum))
       .orderBy(users.name);
 
+    // If no attendance records, return a message
+    if (attendanceRecords.length === 0) {
+      return NextResponse.json(
+        { error: "No attendance records found for this event" },
+        { status: 200 }
+      );
+    }
+
     // Format the data as CSV
     const headers = ["Name", "Email", "Grade Level", "Points Awarded", "Check-in Time"];
     const csvRows = [
