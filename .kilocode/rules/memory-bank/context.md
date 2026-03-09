@@ -69,6 +69,10 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Edit form: inline per-user form with name, email, points, optional new password fields
   - Delete: two-step confirmation with warning about permanent data loss
   - Admin page now fetches allParents directly and passes to AdminUserManager
+- [x] Fixed attendance download functionality
+  - Download button now visible for ALL events (not just those with attendees)
+  - API returns friendly message when no attendees checked in
+  - Client shows "No attendees have checked in for this event yet" message
 
 ## Current Structure
 
