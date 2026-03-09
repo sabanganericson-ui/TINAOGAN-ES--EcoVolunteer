@@ -73,6 +73,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - Download button now visible for ALL events (not just those with attendees)
   - API returns friendly message when no attendees checked in
   - Client shows "No attendees have checked in for this event yet" message
+- [x] Added console logging to debug attendance download button issue
 
 ## Current Structure
 
