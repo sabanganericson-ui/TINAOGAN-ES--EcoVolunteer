@@ -136,7 +136,11 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
 
   const downloadAttendance = async (eventId: number, eventTitle: string, eventDate: string) => {
     try {
+      console.log("Downloading attendance for event:", eventId);
       const response = await fetch(`/api/attendance/download?eventId=${eventId}`);
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+      console.log("Content-Type:", response.headers.get("Content-Type"));
       
       // Check if the response is OK
       if (!response.ok) {
@@ -152,6 +156,9 @@ export default function AdminEventManager({ events }: AdminEventManagerProps) {
       
       // Check if we got an empty CSV (no attendees)
       const text = await response.text();
+      console.log("Response text length:", text.length);
+      console.log("Response text preview:", text.substring(0, 100));
+      
       if (text.trim() === "Name,Email,Grade Level,Points Awarded,Check-in Time") {
         alert("No attendees have checked in for this event yet.");
         return;
