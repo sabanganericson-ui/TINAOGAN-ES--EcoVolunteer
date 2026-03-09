@@ -1,4 +1,7 @@
-import { createDatabase } from "@kilocode/app-builder-db";
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 
-export const db = createDatabase(schema);
+const sqlite = new Database("local.db");
+
+export const db = drizzle(sqlite, { schema });
